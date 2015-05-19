@@ -1,0 +1,12 @@
+[1mdiff --git a/src/com/frank/myfirstapp/MainActivity.java b/src/com/frank/myfirstapp/MainActivity.java[m
+[1mindex ff56e58..78b5a16 100644[m
+[1m--- a/src/com/frank/myfirstapp/MainActivity.java[m
+[1m+++ b/src/com/frank/myfirstapp/MainActivity.java[m
+[36m@@ -42,6 +42,7 @@[m [mimport android.widget.Toast;[m
+ [m
+ public class MainActivity extends ActionBarActivity implements HttpCallBackListener {[m
+ 	[m
+[32m+[m[41m	[m
+ 	public static final int INIT_WEATHERDATA = 0 ;[m
+ 	[m
+ 	private ActionBar bar;[m
