@@ -1,5 +1,6 @@
 package com.frank.myfirstapp.fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -13,6 +14,10 @@ import com.frank.myfirstapp.utils.WeatherData;
 public class TodayFragment extends Fragment {
 	
 	WeatherData mData;
+	
+	public TodayFragment(){
+		
+	}
 	
 	public TodayFragment(WeatherData data) {
 		// TODO Auto-generated constructor stub
@@ -29,10 +34,13 @@ public class TodayFragment extends Fragment {
 		TextView weatherDesp = (TextView) rootView.findViewById(R.id.weather_desp);
 		TextView weatherTemp = (TextView) rootView.findViewById(R.id.weather_temp);
 		
-		cityNameText.setText(mData.getResult().getToday().getCity());
-		currentDataText.setText(mData.getResult().getToday().getData_y());
-		weatherDesp.setText(mData.getResult().getToday().getWeather());
-		weatherTemp.setText(mData.getResult().getToday().getTemperature());
+		SharedPreferences sp = getActivity().getSharedPreferences("WeatherData", 0);
+		
+		cityNameText.setText(sp.getString("cityNameText", ""));
+		currentDataText.setText(sp.getString("currentDataText", ""));
+		weatherDesp.setText(sp.getString("weatherDesp", ""));
+		weatherTemp.setText(sp.getString("weatherTemp", ""));
+		
 		return rootView;
 	}
 

@@ -2,33 +2,28 @@ package com.frank.myfirstapp;
 
 
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
-import com.frank.myfirstapp.fragments.SKFragment;
-import com.frank.myfirstapp.fragments.TodayFragment;
-import com.frank.myfirstapp.utils.HttpCallBackListener;
-import com.frank.myfirstapp.utils.SendHttpURLRequestUtils;
-import com.frank.myfirstapp.utils.WeatherData;
-
-
-
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBar.NavigationMode;
 import android.support.v7.app.ActionBar.Tab;
 import android.support.v7.app.ActionBar.TabListener;
 import android.support.v7.app.ActionBarActivity;
@@ -40,14 +35,29 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity implements HttpCallBackListener {
+import com.frank.myfirstapp.fragments.SKFragment;
+import com.frank.myfirstapp.fragments.TodayFragment;
+import com.frank.myfirstapp.utils.HttpCallBackListener;
+import com.frank.myfirstapp.utils.SendHttpURLRequestUtils;
+import com.frank.myfirstapp.utils.Utils;
+import com.frank.myfirstapp.utils.WeatherData;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+public class MainActivity extends ActionBarActivity  {
 	
 	public static final int INIT_WEATHERDATA = 0 ;
 	
+	private UpdateAsyncTask upDateAsyncTask;
+	
+	private String address;
+	
+	private Location location;
+	
 	private ActionBar bar;
 	private ProgressBar mProgressBar;
-	private Fragment todayFragment;
-	private Fragment skFragment;
+	private TodayFragment todayFragment;
+	private SKFragment skFragment;
 	@SuppressWarnings("deprecation")
 	private Tab todayTab;
 	private Tab skTab;
@@ -61,7 +71,30 @@ public class MainActivity extends ActionBarActivity implements HttpCallBackListe
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		//初始化bar
+		/**
+		 * 初始化ActionBar ProgressBar LocationListener
+		 */
+		initViews();
+		
+		UpDate();
+		
+		
+	}
+
+	private void UpDate() {
+		// TODO Auto-generated method stub
+		location = getLocation();
+		address = getAddress(location);
+		
+		/**
+		 * 根据address返回WeatherData,存入Sharepreference,然后initFragment initTabs
+		 */
+		upDateAsyncTask = new UpdateAsyncTask();
+		upDateAsyncTask.execute(address);
+	}
+
+	private void initViews() {
+		// TODO Auto-generated method stub
 		bar = getSupportActionBar();
 		bar.setTitle("天气预报");
 //		bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -70,10 +103,8 @@ public class MainActivity extends ActionBarActivity implements HttpCallBackListe
 		 * 设置progressbar
 		 */
 		mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
-		mProgressBar.setVisibility(View.VISIBLE);
-		prepareWeatherData();
-		
-		
+//		initFragments();
+		initLocatonListener();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -82,50 +113,18 @@ public class MainActivity extends ActionBarActivity implements HttpCallBackListe
 		todayTab = bar.newTab().setText("今日天气").setTabListener(new TestListener(todayFragment));
 		skTab = bar.newTab().setText("实时天气").setTabListener(new TestListener(skFragment));
 		bar.addTab(todayTab);
+		
 		bar.addTab(skTab);
 	}
 
 	private void initFragments() {
-		// TODO Auto-generated method stub
-		if(mWeatherData != null){
-			Toast.makeText(this, "mWeather isnot null",Toast.LENGTH_SHORT).show();
-			todayFragment = new TodayFragment(mWeatherData);
-			skFragment = new SKFragment(mWeatherData);
-		}
+	
+		todayFragment = new TodayFragment();
+		skFragment = new SKFragment();
 	}
 
-	private void prepareWeatherData() {
-		// TODO Auto-generated method stub
-		handler = new Handler(){
-			@Override
-			public void handleMessage(Message msg) {
-				// TODO Auto-generated method stub
-				switch (msg.what) {
-				case INIT_WEATHERDATA:
-					String response = (String) msg.obj;
-					praseJsonWithGson(response);
-					break;
-
-				default:
-					break;
-				}
-			}
-		};
-		initLocatonListener();
-		Location mLocation = getLocation();
-		String mAddress = getAddress(mLocation);
-		SendHttpURLRequestUtils.sendHttpURLRequest(mAddress, this);
-	}
-	protected void praseJsonWithGson(String json) {
-		// TODO Auto-generated method stub
-		Gson gson = new Gson();
-		Type type = new TypeToken<WeatherData>(){}.getType();
-		mWeatherData = gson.fromJson(json, type);
-		Toast.makeText(this, "mWeatherData got", Toast.LENGTH_SHORT).show();
-		mProgressBar.setVisibility(View.GONE);
-		initFragments();
-		initTabs();
-	}
+	
+	
 	private String getAddress(Location location) {
 		// TODO Auto-generated method stub
 		
@@ -202,7 +201,6 @@ public class MainActivity extends ActionBarActivity implements HttpCallBackListe
 			Toast.makeText(this, "please open your GPS or NetWork", Toast.LENGTH_SHORT).show();
 			return null;
 		}
-//		provider = locationManager.NETWORK_PROVIDER;
 		
 		
 		if(provider != null){
@@ -237,6 +235,10 @@ public class MainActivity extends ActionBarActivity implements HttpCallBackListe
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
+			Toast.makeText(this, "clicked", Toast.LENGTH_SHORT).show();
+			bar.removeAllTabs();
+			UpDate();
+			
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -271,23 +273,86 @@ public class MainActivity extends ActionBarActivity implements HttpCallBackListe
 		
 	}
 	
-	/**
-	 * Httpcallbacklistener 的方法
-	 * @param response
-	 */
-	@Override
-	public void onFinish(String response) {
-		// TODO Auto-generated method stub
-		Message msg = new Message();
-		msg.what = 0;
-		msg.obj = response; /*把返回的Json数据转为String传入Message*/
-		
-		handler.sendMessage(msg);/*发送Message*/
-	}
 
-	@Override
-	public void onError(Exception e) {
-		// TODO Auto-generated method stub
+	class UpdateAsyncTask extends AsyncTask<String, Void, WeatherData>{
+		
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			mProgressBar.setVisibility(View.VISIBLE);
+			super.onPreExecute();
+		}
+
+		@Override
+		protected WeatherData doInBackground(String... addresses) {
+			// TODO Auto-generated method stub
+			String address = addresses[0];
+			
+			HttpURLConnection connection = null;
+			InputStream input = null;
+			BufferedReader reader = null;
+			WeatherData mWeatherData = null;
+			try {
+				URL url = new URL(address);
+				connection = (HttpURLConnection) url.openConnection();
+				connection.setRequestMethod("GET");
+				connection.setReadTimeout(8000);
+				connection.setConnectTimeout(8000);
+				input = connection.getInputStream();
+				reader = new BufferedReader(new InputStreamReader(input));
+				StringBuffer sb = new StringBuffer();
+				String line ;
+				while((line = reader.readLine()) != null){
+					sb.append(line);
+				}
+				Log.d("may", "done herer");
+				mWeatherData = Utils.praseJsonWithGson(sb.toString());
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			finally{
+				if(input != null){
+					try {
+						input.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if(reader != null){
+					try {
+						reader.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				connection.disconnect();
+			}
+			if(mWeatherData == null){
+				Log.d("May", "null data");
+			}
+			return mWeatherData;
+		}
+		
+		@Override
+		protected void onPostExecute(WeatherData result) {
+			// TODO Auto-generated method stub
+			/*
+			 * 更新数据库
+			 */
+			Utils.updataWeatherData(result);
+			initFragments();
+			initTabs();
+			mProgressBar.setVisibility(View.GONE);
+			super.onPostExecute(result);
+		}
+
+		
 		
 	}
+	
+	
 }
