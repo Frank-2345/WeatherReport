@@ -1,5 +1,6 @@
 package com.frank.myfirstapp.broadcasts;
 
+import com.frank.myfirstapp.MainActivity;
 import com.frank.myfirstapp.services.LongRunningService;
 
 import android.content.BroadcastReceiver;
@@ -14,8 +15,11 @@ public class ContiniueLongRunningServiceBroadcastReceiver extends
 	public void onReceive(Context context, Intent intent) {
 		// TODO Auto-generated method stub
 		Toast.makeText(context, "weather data updated", Toast.LENGTH_SHORT).show();
-		Intent i = new Intent(context, LongRunningService.class);
-		context.startService(i);
+		
+		
+		Intent continueIntent = new Intent(context, LongRunningService.class);
+		context.startService(continueIntent);
+		
 	}
 
 }

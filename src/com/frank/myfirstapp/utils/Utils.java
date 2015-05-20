@@ -1,6 +1,9 @@
 package com.frank.myfirstapp.utils;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import com.frank.myfirstapp.R;
 import com.frank.myfirstapp.applications.MyApplication;
@@ -20,9 +23,10 @@ public class Utils {
 	public static boolean updataWeatherData(WeatherData mData){
 		SharedPreferences pref = MyApplication.getContext().getSharedPreferences("WeatherData", 0);
 		SharedPreferences.Editor editor = pref.edit();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyƒÍM‘¬d»’", Locale.CHINA);
 		//Today
 		editor.putString("cityNameText", mData.getResult().getToday().getCity());
-		editor.putString("currentDataText", mData.getResult().getToday().getData_y());
+		editor.putString("currentDataText", sdf.format(new Date()));
 		editor.putString("weatherDesp", mData.getResult().getToday().getWeather());
 		editor.putString("weatherTemp", mData.getResult().getToday().getTemperature());
 		

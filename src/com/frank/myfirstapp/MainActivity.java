@@ -12,7 +12,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
@@ -62,9 +64,9 @@ public class MainActivity extends ActionBarActivity  {
 	private Tab todayTab;
 	private Tab skTab;
 	private LocationListener locationListener;
-	private Handler handler;
+
 	
-	private WeatherData mWeatherData;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -205,7 +207,7 @@ public class MainActivity extends ActionBarActivity  {
 		
 		if(provider != null){
 			location = locationManager.getLastKnownLocation(provider);
-			Toast.makeText(this, "provider got" , Toast.LENGTH_SHORT).show();
+			
 			while(location == null){
 				locationManager.requestLocationUpdates(provider, 80000, 100, locationListener);
 //				location = locationManager.getLastKnownLocation(provider);
@@ -234,8 +236,8 @@ public class MainActivity extends ActionBarActivity  {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			Toast.makeText(this, "clicked", Toast.LENGTH_SHORT).show();
+		if (id == R.id.action_reflash) {
+//			Toast.makeText(this, "clicked", Toast.LENGTH_SHORT).show();
 			bar.removeAllTabs();
 			UpDate();
 			
@@ -354,5 +356,6 @@ public class MainActivity extends ActionBarActivity  {
 		
 	}
 	
+
 	
 }

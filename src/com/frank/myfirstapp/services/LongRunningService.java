@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.util.Log;
 
 public class LongRunningService extends Service {
 
@@ -31,6 +32,7 @@ public class LongRunningService extends Service {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
+				Log.d("Service", "running");
 				
 			}
 		}).start();

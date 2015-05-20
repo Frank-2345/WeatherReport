@@ -1,5 +1,8 @@
 package com.frank.myfirstapp.fragments;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -39,7 +42,7 @@ public class TodayFragment extends Fragment {
 		cityNameText.setText(sp.getString("cityNameText", ""));
 		currentDataText.setText(sp.getString("currentDataText", ""));
 		weatherDesp.setText(sp.getString("weatherDesp", ""));
-		weatherTemp.setText(sp.getString("weatherTemp", ""));
+		weatherTemp.setText(sp.getString("weatherTemp", "") + "¡æ");
 		
 		return rootView;
 	}
